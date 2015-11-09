@@ -1,0 +1,70 @@
+{
+  "name": "deku-search",
+  "version": "1.0.3",
+  "description": "a simple search component",
+  "main": "lib/search.js",
+  "jsnext:main": "src/search.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/StevenIseki/deku-search.git"
+  },
+  "author": "Steven Iseki <stevenisekimartin@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "deku": "^0.5.6"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "devDependencies": {
+    "ava": "^0.3.0",
+    "babel-core": "^5.6.7",
+    "babel-eslint": "^4.1.4",
+    "babel-loader": "^5.1.4",
+    "express": "^4.7.2",
+    "jsdom": "^7.0.2",
+    "pre-commit": "^1.1.2",
+    "deku": "^0.5.6",
+    "virtual-element": "^1.2.0",
+    "standard": "^5.3.1",
+    "webpack": "^1.9.12"
+  },
+  "scripts": {
+    "build": "babel src --out-dir lib",
+    "check-build": "([ ! -d 'lib' ] && npm run build ) || true",
+    "example": "webpack --config ./example/webpack.config.js",
+    "prepublish": "npm run build",
+    "postinstall": "npm run check-build",
+    "serve": "node ./example/server.js",
+    "start": "npm run example && npm run serve",
+    "style": "standard",
+    "test": "npm run check-build && ava test/*.js"
+  },
+  "pre-commit": [
+    "style",
+    "test"
+  ],
+  "standard": {
+    "parser": "babel-eslint",
+    "ignore": [
+      "lib",
+      "example/public"
+    ]
+  },
+  "keywords": [
+    "javascript",
+    "deku",
+    "dekujs",
+    "deku-component",
+    "autocomplete",
+    "search autocomplete",
+    "auto complete",
+    "search",
+    "deku-search",
+    "deku search",
+    "search control",
+    "searchbox",
+    "search-box"
+  ]
+}
