@@ -13,15 +13,13 @@
   "peerDependencies": {
     "deku": "^0.5.6"
   },
-  "files": [
-    "lib",
-    "src"
-  ],
   "devDependencies": {
     "ava": "^0.3.0",
-    "babel-core": "^5.6.7",
-    "babel-eslint": "^4.1.4",
-    "babel-loader": "^5.1.4",
+    "babel-core": "^6.3.26",
+    "babel-loader": "^6.2.0",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "babel-preset-stage-0": "^6.3.13",
     "express": "^4.7.2",
     "jsdom": "^7.0.2",
     "pre-commit": "^1.1.2",
@@ -32,18 +30,13 @@
   },
   "scripts": {
     "build": "babel src --out-dir lib",
-    "check-build": "([ ! -d 'lib' ] && npm run build ) || true",
     "example": "webpack --config ./example/webpack.config.js",
-    "prepublish": "npm run build",
-    "postinstall": "npm run check-build",
     "serve": "node ./example/server.js",
     "start": "npm run example && npm run serve",
     "style": "standard",
-    "test": "npm run check-build && ava test/*.js"
+    "test": "ava test/*.js"
   },
   "pre-commit": [
-    "style",
-    "test"
   ],
   "standard": {
     "parser": "babel-eslint",

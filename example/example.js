@@ -1,32 +1,29 @@
+/** @jsx element */
+
 import Search from '../lib/search'
-import ReactDOM from 'react-dom'
-import React, { Component, PropTypes } from 'react'
 
-class TestComponent extends Component {
-
-  myFunc (e) {
-    console.log(e.target.value)
-    console.log('love coming in to this callback')
-  }
-
-  static propTypes () {
-    return {
-      items: PropTypes.array
-    }
-  }
-
-  render () {
-    return (
-      <div>
-        <Search
-            items={this.props.items}
-            placeHolder='Search for a programming language'
-            onChange={this.myFunc}
-        />
-      </div>
-    )
-  }
+function myFunc (e) {
+  console.log(e.target.value)
+  console.log('love coming in to this callback')
 }
 
-let ITEMS = ['ruby', 'javascript', 'lua', 'go', 'c++', 'julia', 'java', 'c', 'scala', 'haskell']
-ReactDOM.render(<TestComponent items={ITEMS} />, document.getElementById('root'))
+import element from 'virtual-element'
+import Counter from './Counter';
+import {render,tree} from 'deku'
+
+let counter = tree(
+  <div class='app'>
+    <Counter color='pink' />
+    <Counter color='darkred' />
+    <Search />
+  </div>
+);
+
+render(counter, document.getElementById('root'))
+
+/*
+<Search items={this.props.items}
+        placeHolder='Search for a programming language'
+        onChange={this.myFunc} />
+*/
+//let ITEMS = ['ruby', 'javascript', 'lua', 'go', 'c++', 'julia', 'java', 'c', 'scala', 'haskell']

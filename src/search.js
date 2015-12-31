@@ -1,125 +1,80 @@
-/**
- * Search module
- * A simple search component.
-**/
-import SearchItemInArray from './SearchItemInArray'
-import element from 'virtual-element'
+/** @jsx element */
+
 import {render,tree} from 'deku'
+import element from 'virtual-element'
+import SearchItemInArray from './SearchItemInArray'
 
-class Search extends Component {
+let Search = {
 
-  static get defaultProps () {
-    return {
-      ItemElement: 'a',
-      classPrefix: 'deku-search'
-    }
-  }
+  initialState () {
+    return { matchingItems: [] }
+  },
 
-  static get propTypes () {
-    return {
-      classPrefix: PropTypes.string,
-      items: PropTypes.array.isRequired,
-      placeHolder: PropTypes.string,
-      onChange: PropTypes.func,
-      onClick: PropTypes.func,
-      hiddenClassName: PropTypes.string,
-      openClassName: PropTypes.string,
-      ItemElement: PropTypes.oneOfType([
-        PropTypes.element,
-        PropTypes.string
-      ]),
-      itemElemProps: PropTypes.object,
-      inputProps: PropTypes.object,
-      itemProps: PropTypes.object,
-      autoCompleteListProps: PropTypes.object,
-      autoCompleteProps: PropTypes.object,
-      wrapperProps: PropTypes.object
-    }
-  }
+  render (component) {
+    let { props, state } = component;
+    let { matchingItems } = state;
 
-  constructor (props) {
-    super(props)
-    if (this.props.hiddenClassName == null) {
-      this.props.hiddenClassName = `${this.props.classPrefix}__menu--hidden`
-    }
-    if (this.props.openClassName == null) {
-      this.props.openClassName = `${this.props.classPrefix}__menu--open`
-    }
-    this.state = {
-      matchingItems: []
-    }
-  }
-
-  changeInput (e) {
-    if (typeof this.props.onChange !== 'undefined') {
-      this.props.onChange(e)
-    }
-
-    let autocomplete = this.refs.autocomplete
-    autocomplete.className = toggleAutoCompleteClass(autocomplete.className, false, this.props)
-    let searchValue = this.refs.searchInput.value
-    let result = SearchItemInArray(this.props.items, searchValue)
-    this.setState({matchingItems: result})
-  }
-
-  selectAutoComplete (e) {
-    if (typeof this.props.onClick !== 'undefined') {
-      this.props.onClick(e)
-    }
-
-    let autocomplete = this.refs.autocomplete
-    autocomplete.className = toggleAutoCompleteClass(autocomplete.className, true, this.props)
-    let result = e.target.innerHTML
-    this.refs.searchInput.value = result
-  }
-
-  render () {
-    const {
-      ItemElement,
-      inputProps = {},
-      itemElemProps = {},
-      itemProps = {},
-      autoCompleteListProps = {},
-      autoCompleteProps = {},
-      wrapperProps = {}
-    } = this.props
-    const inputClassName = `${this.props.classPrefix}__input`
-    const menuClassName = `${this.props.classPrefix}__menu ${this.props.hiddenClassName}`
-
-    let items = this.state.matchingItems.map((item, i) => (
-      <li key={i} className={`${this.props.classPrefix}__menu-item`} {...itemProps}>
-        <ItemElement {...itemElemProps} onClick={this.selectAutoComplete.bind(this)}>{item}</ItemElement>
+    let items = state.matchingItems.map((item, i) => (
+      <li key={i} class='menu-item'>
+        <a onClick={selectAutoComplete}>
+          {item}
+        </a>
       </li>
     ))
 
     return (
-      <div className={this.props.classPrefix} {...wrapperProps}>
+      <div class='deku-search'>
 
        <input
             type='text'
-            className={inputClassName}
-            placeholder={this.props.placeHolder}
+            class='input'
+            placeholder={props.placeHolder}
             ref='searchInput'
-            onKeyUp={this.changeInput.bind(this)}
-            {...inputProps}
-        />
+            onKeyUp={changeInput} />
 
-        <div className={menuClassName} ref='autocomplete' {...autoCompleteProps}>
-          <ul className={`${this.props.classPrefix}__menu-items`} {...autoCompleteListProps}>
+        <div class='menu' ref='autocomplete'>
+          <ul class='menu-items'>
             {items}
           </ul>
         </div>
 
       </div>
-    )
+    );
+  },
+
+  afterUpdate (component) {
+    let { props, state } = component;
+  },
+
+  afterMount (component, el, setState) {
+    var counter = 0;
+    component.interval = setInterval(() => {
+       setState({ secondsElapsed: counter++ })
+    }, 1000);
+  },
+
+  beforeUnmount (component) {
+    clearInterval(component.interval);
   }
 }
 
-function toggleAutoCompleteClass (className, isOpen, props) {
-  if (isOpen) {
-    return className.replace(props.openClassName, props.hiddenClassName)
+export default Search
+
+
+function changeInput (e) {
+  if (typeof props.onChange !== 'undefined') {
+    props.onChange(e)
   }
-  return className.replace(props.hiddenClassName, props.openClassName)
+  let searchValue = this.refs.searchInput.value
+  let result = SearchItemInArray(props.items, searchValue)
+  this.setState({matchingItems: result})
 }
 
-module.exports = Search
+function selectAutoComplete (e) {
+  if (typeof props.onClick !== 'undefined') {
+    props.onClick(e)
+  }
+
+  let result = e.target.innerHTML
+  this.refs.searchInput.value = result
+}
