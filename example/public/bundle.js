@@ -34,7 +34,7 @@
 /******/ 	__webpack_require__.c = installedModules;
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "public";
+/******/ 	__webpack_require__.p = "/public/";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -44,21 +44,24 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = __webpack_require__(1);
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 	
-	var _search = __webpack_require__(1);
+	var _search = __webpack_require__(2);
 	
 	var _search2 = _interopRequireDefault(_search);
 	
-	var _virtualElement = __webpack_require__(31);
+	var _virtualElement = __webpack_require__(3);
 	
 	var _virtualElement2 = _interopRequireDefault(_virtualElement);
 	
-	var _Counter = __webpack_require__(36);
-	
-	var _Counter2 = _interopRequireDefault(_Counter);
-	
-	var _deku = __webpack_require__(2);
+	var _deku = __webpack_require__(9);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -67,25 +70,29 @@
 	  console.log('love coming in to this callback');
 	} /** @jsx element */
 	
+	var items = ['ruby', 'javascript', 'lua', 'go', 'c++', 'julia', 'java', 'c', 'scala', 'haskell'];
+	
+	var arrayItems = [{ title: 'javascript', description: 'an awesome language' }, { title: 'ruby', description: 'a cool language' }, { title: 'haskell', description: 'a functional language' }];
+	var keys = ['title', 'description'];
+	var key = 'title';
+	
 	var counter = (0, _deku.tree)((0, _virtualElement2.default)(
 	  'div',
 	  { 'class': 'app' },
-	  (0, _virtualElement2.default)(_Counter2.default, { color: 'pink' }),
-	  (0, _virtualElement2.default)(_Counter2.default, { color: 'darkred' }),
-	  (0, _virtualElement2.default)(_search2.default, null)
+	  (0, _virtualElement2.default)(_search2.default, { items: items,
+	    placeHolder: 'Search for a programming language',
+	    onChange: myFunc }),
+	  (0, _virtualElement2.default)(_search2.default, { items: arrayItems,
+	    placeHolder: 'Search for a programming language',
+	    onChange: myFunc,
+	    keys: keys,
+	    searchKey: key })
 	));
 	
 	(0, _deku.render)(counter, document.getElementById('root'));
-	
-	/*
-	<Search items={this.props.items}
-	        placeHolder='Search for a programming language'
-	        onChange={this.myFunc} />
-	*/
-	//let ITEMS = ['ruby', 'javascript', 'lua', 'go', 'c++', 'julia', 'java', 'c', 'scala', 'haskell']
 
 /***/ },
-/* 1 */
+/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -94,15 +101,17 @@
 	  value: true
 	});
 	
-	var _deku = __webpack_require__(2);
-	
-	var _virtualElement = __webpack_require__(31);
+	var _virtualElement = __webpack_require__(3);
 	
 	var _virtualElement2 = _interopRequireDefault(_virtualElement);
 	
-	var _SearchItemInArray = __webpack_require__(35);
+	var _SearchItemInArray = __webpack_require__(7);
 	
 	var _SearchItemInArray2 = _interopRequireDefault(_SearchItemInArray);
+	
+	var _SearchItemInArrayObjects = __webpack_require__(8);
+	
+	var _SearchItemInArrayObjects2 = _interopRequireDefault(_SearchItemInArrayObjects);
 	
 	function _interopRequireDefault(obj) {
 	  return obj && obj.__esModule ? obj : { default: obj };
@@ -117,77 +126,87 @@
 	    var state = component.state;
 	    var matchingItems = state.matchingItems;
 	
-	    var items = state.matchingItems.map(function (item, i) {
-	      return (0, _virtualElement2.default)('li', { key: i, 'class': 'menu-item' }, (0, _virtualElement2.default)('a', { onClick: selectAutoComplete }, item));
-	    });
+	    var items = [];
 	
-	    return (0, _virtualElement2.default)('div', { 'class': 'deku-search' }, (0, _virtualElement2.default)('input', {
-	      type: 'text',
+	    if (props.keys !== undefined) {
+	      /* items for hash results */
+	      items = matchingItems.map(function (item, i) {
+	        return (0, _virtualElement2.default)('li', { key: i,
+	          'class': 'menu-item',
+	          onClick: selectAutoComplete }, props.keys.map(function (itemKey, j) {
+	          return (0, _virtualElement2.default)('a', { key: j }, item[itemKey]);
+	        }));
+	      });
+	    } else {
+	      /* items for a simple array */
+	      items = matchingItems.map(function (item, i) {
+	        return (0, _virtualElement2.default)('li', { key: i, 'class': 'menu-item' }, (0, _virtualElement2.default)('a', { onClick: selectAutoComplete }, item));
+	      });
+	    }
+	
+	    return (0, _virtualElement2.default)('div', { 'class': 'deku-search' }, (0, _virtualElement2.default)('input', { type: 'text',
 	      'class': 'input',
 	      placeholder: props.placeHolder,
-	      ref: 'searchInput',
-	      onKeyUp: changeInput }), (0, _virtualElement2.default)('div', { 'class': 'menu', ref: 'autocomplete' }, (0, _virtualElement2.default)('ul', { 'class': 'menu-items' }, items)));
+	      onKeyUp: changeInput.bind(this) }), (0, _virtualElement2.default)('div', { 'class': 'menu menu-hidden' }, (0, _virtualElement2.default)('ul', { 'class': 'menu-items' }, items)));
 	  },
 	  afterUpdate: function afterUpdate(component) {
 	    var props = component.props;
 	    var state = component.state;
 	  },
 	  afterMount: function afterMount(component, el, setState) {
-	    var counter = 0;
-	    component.interval = setInterval(function () {
-	      setState({ secondsElapsed: counter++ });
-	    }, 1000);
+	    var props = component.props;
+	    var state = component.state;
 	  },
 	  beforeUnmount: function beforeUnmount(component) {
-	    clearInterval(component.interval);
+	    var props = component.props;
+	    var state = component.state;
 	  }
 	}; /** @jsx element */
 	
 	exports.default = Search;
 	
-	function changeInput(e) {
+	function changeInput(e, component, setState) {
+	  var props = component.props;
+	  var state = component.state;
+	
+	  /* change menu to open */
+	
+	  var menu = e.target.parentElement.querySelectorAll('.menu')[0];
+	  menu.className = 'menu menu-open';
+	
+	  var searchValue = e.target.value;
+	  var result = undefined;
+	  if (props.keys !== undefined && props.searchKey !== undefined) {
+	    /* hash */
+	    result = (0, _SearchItemInArrayObjects2.default)(props.items, searchValue, props.searchKey);
+	  } else {
+	    /* array */
+	    result = (0, _SearchItemInArray2.default)(props.items, searchValue);
+	  }
+	  setState({ matchingItems: result });
+	
 	  if (typeof props.onChange !== 'undefined') {
-	    props.onChange(e);
+	    props.onChange(e, result);
 	  }
-	  var searchValue = this.refs.searchInput.value;
-	  var result = (0, _SearchItemInArray2.default)(props.items, searchValue);
-	  this.setState({ matchingItems: result });
 	}
 	
-	function selectAutoComplete(e) {
-	  if (typeof props.onClick !== 'undefined') {
-	    props.onClick(e);
-	  }
+	function selectAutoComplete(e, component, setState) {
+	  var props = component.props;
+	  var state = component.state;
 	
+	  /* change menu to hidden */
+	
+	  e.target.parentNode.parentNode.parentNode.className = 'menu menu-hidden';
+	
+	  /* set selected search result */
 	  var result = e.target.innerHTML;
-	  this.refs.searchInput.value = result;
+	  var input = e.target.parentNode.parentNode.parentNode.parentNode.querySelectorAll('input')[0];
+	  input.value = result;
+	
+	  if (typeof props.onClick !== 'undefined') {
+	    props.onClick(e, result);
+	  }
 	}
-
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Create the application.
-	 */
-	
-	exports.tree =
-	exports.scene =
-	exports.deku = __webpack_require__(3)
-	
-	/**
-	 * Render scenes to the DOM.
-	 */
-	
-	if (typeof document !== 'undefined') {
-	  exports.render = __webpack_require__(5)
-	}
-	
-	/**
-	 * Render scenes to a string
-	 */
-	
-	exports.renderString = __webpack_require__(30)
 
 /***/ },
 /* 3 */
@@ -197,7 +216,269 @@
 	 * Module dependencies.
 	 */
 	
-	var Emitter = __webpack_require__(4)
+	var slice = __webpack_require__(4)
+	var flatten = __webpack_require__(6)
+	
+	/**
+	 * This function lets us create virtual nodes using a simple
+	 * syntax. It is compatible with JSX transforms so you can use
+	 * JSX to write nodes that will compile to this function.
+	 *
+	 * let node = element('div', { id: 'foo' }, [
+	 *   element('a', { href: 'http://google.com' }, 'Google')
+	 * ])
+	 *
+	 * You can leave out the attributes or the children if either
+	 * of them aren't needed and it will figure out what you're
+	 * trying to do.
+	 */
+	
+	module.exports = element
+	
+	/**
+	 * Create virtual trees of components.
+	 *
+	 * This creates the nicer API for the user.
+	 * It translates that friendly API into an actual tree of nodes.
+	 *
+	 * @param {*} type
+	 * @param {Object} attributes
+	 * @param {Array} children
+	 * @return {Object}
+	 * @api public
+	 */
+	
+	function element (type, attributes, children) {
+	  // Default to div with no args
+	  if (!type) {
+	    throw new TypeError('element() needs a type.')
+	  }
+	
+	  // Skipped adding attributes and we're passing
+	  // in children instead.
+	  if (arguments.length === 2 && (typeof attributes === 'string' || Array.isArray(attributes))) {
+	    children = [ attributes ]
+	    attributes = {}
+	  }
+	
+	  // Account for JSX putting the children as multiple arguments.
+	  // This is essentially just the ES6 rest param
+	  if (arguments.length > 2) {
+	    children = slice(arguments, 2)
+	  }
+	
+	  children = children || []
+	  attributes = attributes || {}
+	
+	  // Flatten nested child arrays. This is how JSX compiles some nodes.
+	  children = flatten(children, 2)
+	
+	  // Filter out any `undefined` elements
+	  children = children.filter(function (i) { return typeof i !== 'undefined' })
+	
+	  // if you pass in a function, it's a `Component` constructor.
+	  // otherwise it's an element.
+	  return {
+	    type: type,
+	    children: children,
+	    attributes: attributes
+	  }
+	}
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = exports = __webpack_require__(5);
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	
+	/**
+	 * An Array.prototype.slice.call(arguments) alternative
+	 *
+	 * @param {Object} args something with a length
+	 * @param {Number} slice
+	 * @param {Number} sliceEnd
+	 * @api public
+	 */
+	
+	module.exports = function (args, slice, sliceEnd) {
+	  var ret = [];
+	  var len = args.length;
+	
+	  if (0 === len) return ret;
+	
+	  var start = slice < 0
+	    ? Math.max(0, slice + len)
+	    : slice || 0;
+	
+	  if (sliceEnd !== undefined) {
+	    len = sliceEnd < 0
+	      ? sliceEnd + len
+	      : sliceEnd
+	  }
+	
+	  while (len-- > start) {
+	    ret[len - start] = args[len];
+	  }
+	
+	  return ret;
+	}
+	
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict'
+	
+	/**
+	 * Expose `arrayFlatten`.
+	 */
+	module.exports = arrayFlatten
+	
+	/**
+	 * Recursive flatten function with depth.
+	 *
+	 * @param  {Array}  array
+	 * @param  {Array}  result
+	 * @param  {Number} depth
+	 * @return {Array}
+	 */
+	function flattenWithDepth (array, result, depth) {
+	  for (var i = 0; i < array.length; i++) {
+	    var value = array[i]
+	
+	    if (depth > 0 && Array.isArray(value)) {
+	      flattenWithDepth(value, result, depth - 1)
+	    } else {
+	      result.push(value)
+	    }
+	  }
+	
+	  return result
+	}
+	
+	/**
+	 * Recursive flatten function. Omitting depth is slightly faster.
+	 *
+	 * @param  {Array} array
+	 * @param  {Array} result
+	 * @return {Array}
+	 */
+	function flattenForever (array, result) {
+	  for (var i = 0; i < array.length; i++) {
+	    var value = array[i]
+	
+	    if (Array.isArray(value)) {
+	      flattenForever(value, result)
+	    } else {
+	      result.push(value)
+	    }
+	  }
+	
+	  return result
+	}
+	
+	/**
+	 * Flatten an array, with the ability to define a depth.
+	 *
+	 * @param  {Array}  array
+	 * @param  {Number} depth
+	 * @return {Array}
+	 */
+	function arrayFlatten (array, depth) {
+	  if (depth == null) {
+	    return flattenForever(array, [])
+	  }
+	
+	  return flattenWithDepth(array, [], depth)
+	}
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	var SearchItemInArray = function SearchItemInArray(items, input) {
+	  if (input.trim() === '') {
+	    return [];
+	  }
+	  var reg = new RegExp(input.split('').join('\\w*').replace(/\W/, ''), 'i');
+	
+	  return items.filter(function (item) {
+	    if (reg.test(item)) {
+	      return item;
+	    }
+	  });
+	};
+	
+	module.exports = SearchItemInArray;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	var SearchItemInArrayObjects = function SearchItemInArrayObjects(items, input, searchKey) {
+	  if (input.trim() === '' || searchKey === undefined) {
+	    return [];
+	  }
+	  var reg = new RegExp(input.split('').join('\\w*').replace(/\W/, ''), 'i');
+	
+	  return items.filter(function (item) {
+	    if (reg.test(item[searchKey])) {
+	      return item;
+	    }
+	  });
+	};
+	
+	module.exports = SearchItemInArrayObjects;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Create the application.
+	 */
+	
+	exports.tree =
+	exports.scene =
+	exports.deku = __webpack_require__(10)
+	
+	/**
+	 * Render scenes to the DOM.
+	 */
+	
+	if (typeof document !== 'undefined') {
+	  exports.render = __webpack_require__(12)
+	}
+	
+	/**
+	 * Render scenes to a string
+	 */
+	
+	exports.renderString = __webpack_require__(37)
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Module dependencies.
+	 */
+	
+	var Emitter = __webpack_require__(11)
 	
 	/**
 	 * Expose `scene`.
@@ -281,7 +562,7 @@
 
 
 /***/ },
-/* 4 */
+/* 11 */
 /***/ function(module, exports) {
 
 	
@@ -448,24 +729,24 @@
 
 
 /***/ },
-/* 5 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Dependencies.
 	 */
 	
-	var raf = __webpack_require__(6)
-	var isDom = __webpack_require__(7)
-	var uid = __webpack_require__(8)
-	var keypath = __webpack_require__(9)
-	var events = __webpack_require__(10)
-	var svg = __webpack_require__(11)
-	var defaults = __webpack_require__(14)
-	var forEach = __webpack_require__(15)
-	var assign = __webpack_require__(19)
-	var reduce = __webpack_require__(20)
-	var nodeType = __webpack_require__(24)
+	var raf = __webpack_require__(13)
+	var isDom = __webpack_require__(14)
+	var uid = __webpack_require__(15)
+	var keypath = __webpack_require__(16)
+	var events = __webpack_require__(17)
+	var svg = __webpack_require__(18)
+	var defaults = __webpack_require__(21)
+	var forEach = __webpack_require__(22)
+	var assign = __webpack_require__(26)
+	var reduce = __webpack_require__(27)
+	var nodeType = __webpack_require__(31)
 	
 	/**
 	 * Expose `dom`.
@@ -1760,7 +2041,7 @@
 
 
 /***/ },
-/* 6 */
+/* 13 */
 /***/ function(module, exports) {
 
 	/**
@@ -1800,7 +2081,7 @@
 
 
 /***/ },
-/* 7 */
+/* 14 */
 /***/ function(module, exports) {
 
 	/*global window*/
@@ -1821,7 +2102,7 @@
 
 
 /***/ },
-/* 8 */
+/* 15 */
 /***/ function(module, exports) {
 
 	/** generate unique id for selector */
@@ -1832,7 +2113,7 @@
 	};
 
 /***/ },
-/* 9 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory){
@@ -2116,7 +2397,7 @@
 
 
 /***/ },
-/* 10 */
+/* 17 */
 /***/ function(module, exports) {
 
 	/**
@@ -2166,18 +2447,18 @@
 
 
 /***/ },
-/* 11 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  isElement: __webpack_require__(12).isElement,
-	  isAttribute: __webpack_require__(13),
+	  isElement: __webpack_require__(19).isElement,
+	  isAttribute: __webpack_require__(20),
 	  namespace: 'http://www.w3.org/2000/svg'
 	}
 
 
 /***/ },
-/* 12 */
+/* 19 */
 /***/ function(module, exports) {
 
 	/**
@@ -2219,7 +2500,7 @@
 
 
 /***/ },
-/* 13 */
+/* 20 */
 /***/ function(module, exports) {
 
 	/**
@@ -2284,7 +2565,7 @@
 
 
 /***/ },
-/* 14 */
+/* 21 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -2307,13 +2588,13 @@
 
 
 /***/ },
-/* 15 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var forEachArray = __webpack_require__(16),
-	    forEachObject = __webpack_require__(18);
+	var forEachArray = __webpack_require__(23),
+	    forEachObject = __webpack_require__(25);
 	
 	/**
 	 * # ForEach
@@ -2334,12 +2615,12 @@
 	};
 
 /***/ },
-/* 16 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var bindInternal3 = __webpack_require__(17);
+	var bindInternal3 = __webpack_require__(24);
 	
 	/**
 	 * # For Each
@@ -2361,7 +2642,7 @@
 
 
 /***/ },
-/* 17 */
+/* 24 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2378,12 +2659,12 @@
 
 
 /***/ },
-/* 18 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var bindInternal3 = __webpack_require__(17);
+	var bindInternal3 = __webpack_require__(24);
 	
 	/**
 	 * # For Each
@@ -2407,7 +2688,7 @@
 
 
 /***/ },
-/* 19 */
+/* 26 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2447,13 +2728,13 @@
 
 
 /***/ },
-/* 20 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var reduceArray = __webpack_require__(21),
-	    reduceObject = __webpack_require__(23);
+	var reduceArray = __webpack_require__(28),
+	    reduceObject = __webpack_require__(30);
 	
 	/**
 	 * # Reduce
@@ -2476,12 +2757,12 @@
 	};
 
 /***/ },
-/* 21 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var bindInternal4 = __webpack_require__(22);
+	var bindInternal4 = __webpack_require__(29);
 	
 	/**
 	 * # Reduce
@@ -2517,7 +2798,7 @@
 
 
 /***/ },
-/* 22 */
+/* 29 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2534,12 +2815,12 @@
 
 
 /***/ },
-/* 23 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var bindInternal4 = __webpack_require__(22);
+	var bindInternal4 = __webpack_require__(29);
 	
 	/**
 	 * # Reduce
@@ -2577,10 +2858,10 @@
 
 
 /***/ },
-/* 24 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var type = __webpack_require__(25)
+	var type = __webpack_require__(32)
 	
 	/**
 	 * Returns the type of a virtual node
@@ -2599,7 +2880,7 @@
 
 
 /***/ },
-/* 25 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {/**
@@ -2639,10 +2920,10 @@
 	  return typeof val;
 	};
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(26).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer))
 
 /***/ },
-/* 26 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer, global) {/*!
@@ -2655,9 +2936,9 @@
 	
 	'use strict'
 	
-	var base64 = __webpack_require__(27)
-	var ieee754 = __webpack_require__(28)
-	var isArray = __webpack_require__(29)
+	var base64 = __webpack_require__(34)
+	var ieee754 = __webpack_require__(35)
+	var isArray = __webpack_require__(36)
 	
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -4194,10 +4475,10 @@
 	  return i
 	}
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(26).Buffer, (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33).Buffer, (function() { return this; }())))
 
 /***/ },
-/* 27 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -4327,7 +4608,7 @@
 
 
 /***/ },
-/* 28 */
+/* 35 */
 /***/ function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -4417,7 +4698,7 @@
 
 
 /***/ },
-/* 29 */
+/* 36 */
 /***/ function(module, exports) {
 
 	var toString = {}.toString;
@@ -4428,12 +4709,12 @@
 
 
 /***/ },
-/* 30 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var defaults = __webpack_require__(14)
-	var nodeType = __webpack_require__(24)
-	var type = __webpack_require__(25)
+	var defaults = __webpack_require__(21)
+	var nodeType = __webpack_require__(31)
+	var type = __webpack_require__(32)
 	
 	/**
 	 * Expose `stringify`.
@@ -4564,278 +4845,6 @@
 	  }
 	}
 
-
-/***/ },
-/* 31 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Module dependencies.
-	 */
-	
-	var slice = __webpack_require__(32)
-	var flatten = __webpack_require__(34)
-	
-	/**
-	 * This function lets us create virtual nodes using a simple
-	 * syntax. It is compatible with JSX transforms so you can use
-	 * JSX to write nodes that will compile to this function.
-	 *
-	 * let node = element('div', { id: 'foo' }, [
-	 *   element('a', { href: 'http://google.com' }, 'Google')
-	 * ])
-	 *
-	 * You can leave out the attributes or the children if either
-	 * of them aren't needed and it will figure out what you're
-	 * trying to do.
-	 */
-	
-	module.exports = element
-	
-	/**
-	 * Create virtual trees of components.
-	 *
-	 * This creates the nicer API for the user.
-	 * It translates that friendly API into an actual tree of nodes.
-	 *
-	 * @param {*} type
-	 * @param {Object} attributes
-	 * @param {Array} children
-	 * @return {Object}
-	 * @api public
-	 */
-	
-	function element (type, attributes, children) {
-	  // Default to div with no args
-	  if (!type) {
-	    throw new TypeError('element() needs a type.')
-	  }
-	
-	  // Skipped adding attributes and we're passing
-	  // in children instead.
-	  if (arguments.length === 2 && (typeof attributes === 'string' || Array.isArray(attributes))) {
-	    children = [ attributes ]
-	    attributes = {}
-	  }
-	
-	  // Account for JSX putting the children as multiple arguments.
-	  // This is essentially just the ES6 rest param
-	  if (arguments.length > 2) {
-	    children = slice(arguments, 2)
-	  }
-	
-	  children = children || []
-	  attributes = attributes || {}
-	
-	  // Flatten nested child arrays. This is how JSX compiles some nodes.
-	  children = flatten(children, 2)
-	
-	  // Filter out any `undefined` elements
-	  children = children.filter(function (i) { return typeof i !== 'undefined' })
-	
-	  // if you pass in a function, it's a `Component` constructor.
-	  // otherwise it's an element.
-	  return {
-	    type: type,
-	    children: children,
-	    attributes: attributes
-	  }
-	}
-
-
-/***/ },
-/* 32 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = exports = __webpack_require__(33);
-
-
-/***/ },
-/* 33 */
-/***/ function(module, exports) {
-
-	
-	/**
-	 * An Array.prototype.slice.call(arguments) alternative
-	 *
-	 * @param {Object} args something with a length
-	 * @param {Number} slice
-	 * @param {Number} sliceEnd
-	 * @api public
-	 */
-	
-	module.exports = function (args, slice, sliceEnd) {
-	  var ret = [];
-	  var len = args.length;
-	
-	  if (0 === len) return ret;
-	
-	  var start = slice < 0
-	    ? Math.max(0, slice + len)
-	    : slice || 0;
-	
-	  if (sliceEnd !== undefined) {
-	    len = sliceEnd < 0
-	      ? sliceEnd + len
-	      : sliceEnd
-	  }
-	
-	  while (len-- > start) {
-	    ret[len - start] = args[len];
-	  }
-	
-	  return ret;
-	}
-	
-
-
-/***/ },
-/* 34 */
-/***/ function(module, exports) {
-
-	'use strict'
-	
-	/**
-	 * Expose `arrayFlatten`.
-	 */
-	module.exports = arrayFlatten
-	
-	/**
-	 * Recursive flatten function with depth.
-	 *
-	 * @param  {Array}  array
-	 * @param  {Array}  result
-	 * @param  {Number} depth
-	 * @return {Array}
-	 */
-	function flattenWithDepth (array, result, depth) {
-	  for (var i = 0; i < array.length; i++) {
-	    var value = array[i]
-	
-	    if (depth > 0 && Array.isArray(value)) {
-	      flattenWithDepth(value, result, depth - 1)
-	    } else {
-	      result.push(value)
-	    }
-	  }
-	
-	  return result
-	}
-	
-	/**
-	 * Recursive flatten function. Omitting depth is slightly faster.
-	 *
-	 * @param  {Array} array
-	 * @param  {Array} result
-	 * @return {Array}
-	 */
-	function flattenForever (array, result) {
-	  for (var i = 0; i < array.length; i++) {
-	    var value = array[i]
-	
-	    if (Array.isArray(value)) {
-	      flattenForever(value, result)
-	    } else {
-	      result.push(value)
-	    }
-	  }
-	
-	  return result
-	}
-	
-	/**
-	 * Flatten an array, with the ability to define a depth.
-	 *
-	 * @param  {Array}  array
-	 * @param  {Number} depth
-	 * @return {Array}
-	 */
-	function arrayFlatten (array, depth) {
-	  if (depth == null) {
-	    return flattenForever(array, [])
-	  }
-	
-	  return flattenWithDepth(array, [], depth)
-	}
-
-
-/***/ },
-/* 35 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	var SearchItemInArray = function SearchItemInArray(items, input) {
-	  if (input.trim() === '') {
-	    return [];
-	  }
-	  var reg = new RegExp(input.split('').join('\\w*').replace(/\W/, ''), 'i');
-	
-	  return items.filter(function (item) {
-	    if (reg.test(item)) {
-	      return item;
-	    }
-	  });
-	};
-	
-	module.exports = SearchItemInArray;
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _deku = __webpack_require__(2);
-	
-	var _virtualElement = __webpack_require__(31);
-	
-	var _virtualElement2 = _interopRequireDefault(_virtualElement);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	/** @jsx element */
-	
-	var Counter = {
-	  initialState: function initialState() {
-	    return { secondsElapsed: 0 };
-	  },
-	  render: function render(component) {
-	    var props = component.props;
-	    var state = component.state;
-	    var secondsElapsed = state.secondsElapsed;
-	
-	    return (0, _virtualElement2.default)(
-	      'div',
-	      { 'class': 'counter' },
-	      (0, _virtualElement2.default)(
-	        'h1',
-	        { 'class': 'counter--' + props.color },
-	        'Counter: ',
-	        secondsElapsed
-	      )
-	    );
-	  },
-	  afterUpdate: function afterUpdate(component) {
-	    var props = component.props;
-	    var state = component.state;
-	  },
-	  afterMount: function afterMount(component, el, setState) {
-	    var counter = 0;
-	    component.interval = setInterval(function () {
-	      setState({ secondsElapsed: counter++ });
-	    }, 1000);
-	  },
-	  beforeUnmount: function beforeUnmount(component) {
-	    clearInterval(component.interval);
-	  }
-	};
-	
-	exports.default = Counter;
 
 /***/ }
 /******/ ]);

@@ -1,8 +1,8 @@
 /** @jsx element */
 
-import {render,tree} from 'deku'
 import element from 'virtual-element'
 import SearchItemInArray from './SearchItemInArray'
+import SearchItemInArrayObjects from './SearchItemInArrayObjects'
 
 let Search = {
 
@@ -11,70 +11,107 @@ let Search = {
   },
 
   render (component) {
-    let { props, state } = component;
-    let { matchingItems } = state;
+    let { props, state } = component
+    let { matchingItems } = state
+    let items = []
 
-    let items = state.matchingItems.map((item, i) => (
-      <li key={i} class='menu-item'>
-        <a onClick={selectAutoComplete}>
-          {item}
-        </a>
-      </li>
-    ))
+    if ((props.keys !== undefined)) {
+      /* items for hash results */
+      items = matchingItems.map((item, i) => {
+        return (
+          <li key={i}
+              class='menu-item'
+              onClick={selectAutoComplete}>
+            {
+              props.keys.map((itemKey, j) => {
+                return (
+                  <a key={j}>
+                  { item[itemKey] }
+                  </a>
+                )
+              })
+            }
+          </li>
+        )
+      })
+    } else {
+      /* items for a simple array */
+      items = matchingItems.map((item, i) => (
+        <li key={i} class='menu-item'>
+          <a onClick={selectAutoComplete}>{item}</a>
+        </li>
+      ))
+    }
 
     return (
       <div class='deku-search'>
 
-       <input
-            type='text'
-            class='input'
-            placeholder={props.placeHolder}
-            ref='searchInput'
-            onKeyUp={changeInput} />
+       <input type='text'
+              class='input'
+              placeholder={props.placeHolder}
+              onKeyUp={changeInput.bind(this)} />
 
-        <div class='menu' ref='autocomplete'>
+        <div class='menu menu-hidden'>
           <ul class='menu-items'>
             {items}
           </ul>
         </div>
 
       </div>
-    );
+    )
   },
 
   afterUpdate (component) {
-    let { props, state } = component;
+    let { props, state } = component
   },
 
   afterMount (component, el, setState) {
-    var counter = 0;
-    component.interval = setInterval(() => {
-       setState({ secondsElapsed: counter++ })
-    }, 1000);
+    let { props, state } = component
   },
 
   beforeUnmount (component) {
-    clearInterval(component.interval);
+    let { props, state } = component
   }
 }
 
 export default Search
 
+function changeInput (e, component, setState) {
+  let { props, state } = component
 
-function changeInput (e) {
-  if (typeof props.onChange !== 'undefined') {
-    props.onChange(e)
+  /* change menu to open */
+  let menu = e.target.parentElement.querySelectorAll('.menu')[0]
+  menu.className = 'menu menu-open'
+
+  let searchValue = e.target.value
+  let result
+  if ((props.keys !== undefined && props.searchKey !== undefined)) {
+    /* hash */
+    result = SearchItemInArrayObjects(props.items, searchValue, props.searchKey)
+  } else {
+    /* array */
+    result = SearchItemInArray(props.items, searchValue)
   }
-  let searchValue = this.refs.searchInput.value
-  let result = SearchItemInArray(props.items, searchValue)
-  this.setState({matchingItems: result})
+  setState({matchingItems: result})
+
+  if (typeof props.onChange !== 'undefined') {
+    props.onChange(e, result)
+  }
 }
 
-function selectAutoComplete (e) {
+function selectAutoComplete (e, component, setState) {
+  let { props, state } = component
+
+  /* change menu to hidden */
+  e.target.parentNode.parentNode.parentNode.className = 'menu menu-hidden'
+  
+  /* set selected search result */
+  let result = e.target.innerHTML
+  let input = e.target.parentNode.parentNode.parentNode.parentNode.querySelectorAll('input')[0]
+  input.value = result
+
   if (typeof props.onClick !== 'undefined') {
-    props.onClick(e)
+    props.onClick(e, result)
   }
 
-  let result = e.target.innerHTML
-  this.refs.searchInput.value = result
 }

@@ -13,28 +13,41 @@ deku-search is a simple search autocomplete component.
 
 ```jsx
 
+/** @jsx element */
+
+import Search from 'deku-search'
 import element from 'virtual-element'
 import {render,tree} from 'deku'
-import Search from 'deku-search'
 
-let ITEMS = ['ruby', 'javascript', 'lua', 'go', 'julia', 'c', 'scala','haskell']
+let items = ['ruby', 'javascript', 'lua', 'go', 'c++', 'julia', 'scala', 'haskell']
 
-render(<Search items={ITEMS}/>, document.getElementById('root'));
+let arrayItems = [ 
+  { title: 'javascript', description: 'an awesome language' },
+  { title: 'ruby', description: 'a cool language' },
+  { title: 'haskell', description: 'a functional language' }
+]
+let keys = ['title', 'description']
+let key = 'title'
 
+let counter = tree(
+  <div class='app'>
+    <Search items={items} 
+    		placeHolder='Search for a programming language' />
+
+    <Search items={arrayItems} 
+    		placeHolder='Search for a programming language'
+    		keys={keys} 
+    		searchKey={key} />
+  </div>
+);
+
+render(counter, document.getElementById('root'))
 ```
 
-## Basic Props
+## Props
 
 #### `items` (required)
 List of Items to filter through
-
-#### `classPrefix`
-default: `deku-search`
-Optional class prefix for included class names. Will also be attached to the main wrapper element. Included class suffixes are:
-  - `__input`
-  - `__menu`
-  - `__menu-item`
-  - `__menu--hidden`
 
 #### `placeHolder`
 Placeholder attribute for the text input
@@ -45,39 +58,9 @@ Update handler for the text input. Fired before the internal logic to update the
 #### `onClick`
 Click handler for each item in the autocomplete list. Fired before the internal logic to hide the autocomplete list
 
-#### `ItemElement`
-default: `'a'`
-Custom element to use for each `<li>` in the autocomplete list. Can be an Element or a valid DOM tag as a string, such as `<CustomElement>` or `'div'`
-
-## Advanced Props
-
-All of the following allow you to extend ([via spread operator](https://facebook.github.io/react/docs/transferring-props.html)) the properties of the individual elements that make up the `Search` component.
-
-#### `inputProps`
-Property extensions for the text input
-
-#### `itemProps`
-Property extensions for the each individual autocomplete `<li>`
-
-#### `itemElemProps`
-Property extensions for the each child element of autocomplete `<li>`
-
-#### `autoCompleteListProps`
-Property extensions for the autocomplete `<ul>`
-
-#### `autoCompleteProps`
-Property extensions for the autocomplete wrapper
-
-#### `wrapperProps`
-Property extensions for the wrapper that is the root of the `<Search>` component
-
-## Callbacks onClick and onChange
-
-You can specify callback functions for onClick of the element and onChange of the search input. The element passed in is the SyntheticKeyboardEvent, which you can use to get the target or value. Check out the [example](https://github.com/StevenIseki/deku-search/tree/master/example)
-
 ## Styles
 
-deku-search can be used with your own custom styles. A minimal search.css style sheet is included in the example as a guide. The styles follow [BEM](https://en.bem.info/method/) naming conventions.
+deku-search can be used with your own custom styles. A minimal search.css style sheet is included in the example as a guide. 
 
 ## Development
     npm install

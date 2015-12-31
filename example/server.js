@@ -1,14 +1,27 @@
-var express = require('express')
-var path = require('path')
+var path = require('path');
+var express = require('express');
+var webpack = require('webpack');
+var config = require('./webpack.config');
 
-var port = process.env.PORT || 5000
+var app = express();
+var compiler = webpack(config);
 
-express()
-  .use('/public', express.static(__dirname + '/public'))
-  .get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, '/index.html'))
-  })
-  .listen(port, function () {
-    console.log('Listening on ' + port + '.')
-    console.log('Go to <http://localhost:' + port + '> in your browser.')
-  })
+app.use(require('webpack-dev-middleware')(compiler, {
+  noInfo: true,
+  publicPath: config.output.publicPath
+}));
+
+app.use('/public', express.static(__dirname + '/public'))
+
+app.get('*', function(req, res) {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(5000, 'localhost', function(err) {
+  if (err) {
+    console.log(err);
+    return;
+  }
+
+  console.log('Listening at http://localhost:5000');
+});
