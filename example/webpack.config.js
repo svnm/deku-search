@@ -1,19 +1,20 @@
 var path = require('path');
-var webpack = require('webpack');
 
 module.exports = {
-  devtool: 'source-map',
-  entry: ['./example/example.js'],
+  context: __dirname,
+  devtool: 'inline-source-map',
+  entry: { app: './example.js' },
   output: {
-    filename: 'bundle.js',
-    path: path.join(__dirname, 'public'),
-    publicPath: '/public/'
+    filename: './example/public/bundle.js',
+    publicPath: 'public'
   },
   module: {
     loaders: [
-      { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ }
+      {
+        test: /\.jsx?$/,
+        exclude: /(node_modules|bower_components)/,
+        loader: 'babel'
+      }
     ]
-  },
-  plugins: []
-
+  }
 };

@@ -1,68 +1,133 @@
 # deku-search
 
 [![npm version](https://badge.fury.io/js/deku-search.svg)](https://badge.fury.io/js/deku-search)
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
-deku-search is a simple search autocomplete component.
+![](https://raw.githubusercontent.com/StevenIseki/deku-search/master/example/screenshot.gif)
 
-## Installation
+deku-search is a simple Autocomplete Search component
+
+## Install
 
 `npm install deku-search --save`
 
-## Usage
+## Usage basic
+
+Pass in your `items` as a prop to deku-search. The items must be an array of objects with `value` and `id`, and any other props you may need, which will not be displayed. Check out the [example](https://github.com/StevenIseki/deku-search/blob/master/example) for more info.
 
 ```jsx
-
-/** @jsx element */
-
 import Search from 'deku-search'
-import element from 'virtual-element'
-import {render,tree} from 'deku'
+import { element } from 'deku'
 
-let items = ['ruby', 'javascript', 'lua', 'go', 'c++', 'julia', 'scala', 'haskell']
+class TestComponent extends Component {
 
-let arrayItems = [ 
-  { title: 'javascript', description: 'an awesome language' },
-  { title: 'ruby', description: 'a cool language' },
-  { title: 'haskell', description: 'a functional language' }
-]
-let keys = ['title', 'description']
-let key = 'title'
+  HiItems(items) {
+    console.log(items)
+  }
 
-let counter = tree(
-  <div class='app'>
-    <Search items={items} 
-    		placeHolder='Search for a programming language' />
+  render () {
+    let items = [
+      { id: 0, value: 'ruby' },
+      { id: 1, value: 'javascript' },
+      { id: 2, value: 'lua' },
+      { id: 3, value: 'go' },
+      { id: 4, value: 'julia' }
+    ]
 
-    <Search items={arrayItems} 
-    		placeHolder='Search for a programming language'
-    		keys={keys} 
-    		searchKey={key} />
-  </div>
-);
+    return (
+      <div>
+        <Search items={items} />
 
-render(counter, document.getElementById('root'))
+        <Search items={items}
+                placeholder='Pick your language'
+                maxSelected={3}
+                multiple={true}
+                onItemsChanged={this.HiItems.bind(this)} />
+      </div>
+    )
+  }
+}
+
+dekuDOM.render( <TestComponent />, document.getElementById('root'))
+```
+
+## Usage async
+
+To load items async before running the search to filter results you can pass a function to the `getItemsAsync` prop which will be triggered to load the results each key change. An example below using the github api to search for repos. Check out the [example](https://github.com/StevenIseki/deku-search/blob/master/example) for more info.
+
+```jsx
+import Search from 'deku-search'
+import dekuDOM from 'deku-dom'
+import deku, { Component, PropTypes } from 'deku'
+
+class TestComponent extends Component {
+
+  constructor (props) {
+    super(props)
+    this.state = { repos: [] }
+  }
+
+  getItemsAsync(searchValue, cb) {
+    let url = `https://api.github.com/search/repositories?q=${searchValue}&language=javascript`
+    fetch(url).then( (response) => {
+      return response.json();
+    }).then((results) => {
+      if(results.items != undefined){
+        let items = results.items.map( (res, i) => { return { id: i, value: res.full_name } })
+        this.setState({ repos: items })
+        cb(searchValue)
+      }
+    });
+  }
+
+  render () {
+    return (
+      <div>
+        <Search items={this.state.repos}
+                multiple={true}
+                getItemsAsync={this.getItemsAsync.bind(this)}
+                onItemsChanged={this.HiItems.bind(this)} />
+      </div>
+    )
+  }
+}
+
+dekuDOM.render( <TestComponent />, document.getElementById('root'))
+
 ```
 
 ## Props
 
 #### `items` (required)
-List of Items to filter through
+List of Items to filter through, an array of items with `value` and `id`, and any other props. value is displayed. ` let items = [{ id: 0, value: 'ruby' }, { id: 1, value: 'lua' }`
 
-#### `placeHolder`
-Placeholder attribute for the text input
+#### `multiple` (optional)
+Defaults to false, set as true if you want multiple items in the list, false for a single selection dropdown.
 
-#### `onChange`
-Update handler for the text input. Fired before the internal logic to update the autocomplete list
+#### `maxSelected` (optional)
+Defaults to 100, a maximum number of items allowed to be selected
 
-#### `onClick`
-Click handler for each item in the autocomplete list. Fired before the internal logic to hide the autocomplete list
+#### `placeholder` (optional)
+placeholder for the input
+
+#### `NotFoundPlaceholder` (optional)
+The placeholder shown when no results are found
+
+#### `onItemsChanged` (optional)
+Handler returns the items from the Search autocomplete component when items are added or removed from the list.
+
+#### `onKeyChange` (optional)
+Handler returns the search value on key change.
+
+#### `getItemsAsync` (optional)
+A function to load items async before running the autocomplete filter.
+
 
 ## Styles
 
-deku-search can be used with your own custom styles. A minimal search.css style sheet is included in the example as a guide. 
+deku-search can be used with your own custom styles. A minimal [deku-search.css](https://github.com/StevenIseki/deku-search/blob/master/lib/deku-search.css) style sheet is included.
 
 ## Development
+
     npm install
     npm run build
     npm test

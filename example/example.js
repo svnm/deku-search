@@ -1,41 +1,27 @@
 /** @jsx element */
+import Search from '../lib/Search'
+import { element, createApp } from 'deku'
 
-import Search from '../lib/search'
-
-function myFunc (e) {
-  console.log(e.target.value)
-  console.log('love coming in to this callback')
+function HiItems(items) {
+  console.log(items)
 }
 
-import element from 'virtual-element'
-import {render,tree} from 'deku'
-
-let items = ['ruby', 'javascript', 'lua', 'go', 'c++', 'julia', 'java', 'c', 'scala', 'haskell']
-
-let arrayItems = [ 
-  { title: 'javascript', description: 'an awesome language' },
-  { title: 'ruby', description: 'a cool language' },
-  { title: 'haskell', description: 'a functional language' }
+let items = [
+  { id: 0, value: 'ruby' },
+  { id: 1, value: 'javascript' },
+  { id: 2, value: 'lua' },
+  { id: 3, value: 'go' },
+  { id: 4, value: 'julia' }
 ]
-let keys = ['title', 'description']
-let key = 'title'
 
-let counter = tree(
-  <div class='app'>
+function update () {
+  render(<Search items={items}
+                 placeholder='Pick your language'
+                 NotFoundPlaceholder='No items found...'
+                 maxSelected={3}
+                 multiple={true}
+                 onItemsChanged={ () => HiItems() } />, {})
+}
 
-    <Search items={items} 
-    		placeHolder='Search for a programming language' 
-    		onChange={myFunc} />
-
-    <Search items={arrayItems} 
-    		placeHolder='Search for a programming language' 
-    		onChange={myFunc} 
-    		keys={keys} 
-    		searchKey={key} />
-
-  </div>
-);
-
-render(counter, document.getElementById('root'))
-
-
+var render = createApp(document.body, update)
+update()
