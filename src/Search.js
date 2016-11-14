@@ -16,17 +16,12 @@ function initialState() {
 }
 
 function onCreate({ props, state, setState }) {
-	const {items} = props
-  console.log('onCreate', props, state)
-  /* need to copy component mount still */
 }
 
 function render({ props, state, setState }) {
 
-  console.log('render',props,state)
-
 	const { items, initialSelected, onItemsChanged, placeholder, NotFoundPlaceholder,
-    maxSelected, multiple, onKeyChange, getItemsAsync } = props
+    maxSelected, multiple, onKeyChange } = props
 
 	const { menuItems, selectedItems, searchValue, menuVisible } = state
 
@@ -65,26 +60,16 @@ function render({ props, state, setState }) {
     }
   }
 
-  function triggerGetItemsAsync(searchValue) {
-    if (getItemsAsync !== undefined) {
-      getItemsAsync(searchValue, () => {
-        updateSearchValue(searchValue)
-      })
-    }
-  }
-
   function setSelected(selected) {
-    setState({selectedItems: selected }, () => {
-      triggerItemsChanged()
-    })
+    setState({selectedItems: selected })
+    triggerItemsChanged()
   }
 
   function addSelected(selected) {
     let items = selectedItems
     items.push(selected)
-    setState({selectedItems: items }, () => {
-      triggerItemsChanged()
-    })
+    setState({selectedItems: items })
+    triggerItemsChanged()
   }
 
   function removeSelected(itemId) {
@@ -92,16 +77,14 @@ function render({ props, state, setState }) {
     let itemsUpdated = items.filter( (i) => {
 	     return i.id != itemId
     })
-    setState({selectedItems: itemsUpdated }, () => {
-      triggerItemsChanged()
-    })
+    setState({selectedItems: itemsUpdated })
+    triggerItemsChanged()
   }
 
   function updateSearchValue(value) {
-    setState({ searchValue: value }, () => {
-      let menuItems = SearchItemInArrayObjects(items, searchValue, 'value')
-      setMenuItems(menuItems)
-    })
+    setState({ searchValue: value })
+    let menuItems = SearchItemInArrayObjects(items, value, 'value')
+    setMenuItems(menuItems)
   }
 
   function showAllMenuItems() {
@@ -112,7 +95,7 @@ function render({ props, state, setState }) {
 
   function setMenuItems(items) {
     setState({menuItems: items})
-    if(items.length || getItemsAsync != undefined){
+    if(items.length){
       showMenu()
     } else {
       hideMenu()
@@ -166,18 +149,15 @@ function render({ props, state, setState }) {
   function handleKeyChange (e) {
     let value = document.querySelector('#searchInput').value
     triggerKeyChange(value)
-    if( getItemsAsync != undefined ) {
-      triggerGetItemsAsync(value)
-    } else {
-      updateSearchValue(value)
-    }
+    updateSearchValue(value)
   }
 
   function renderMenuItems() {
     if(!menuItems.length) {
+      let notFound = (NotFoundPlaceholder === undefined) ? 'Please search for some items...' : NotFoundPlaceholder
       return (
         <li class='autocomplete__item autocomplete__item--disabled'>
-          <span data-id={0}>{NotFoundPlaceholder}</span>
+          <span data-id={0}>{notFound}</span>
         </li>
       )
     }
@@ -186,13 +166,13 @@ function render({ props, state, setState }) {
       if(itemSelected(item.id)){
         return (
           <li key={i} class='autocomplete__item autocomplete__item--disabled'>
-            <span key={i} data-id={item.id} innerHTML={{__html: item.value }}></span>
+            <span key={i} data-id={item.id} innerHTML={item.value}></span>
           </li>
         )
       } else {
         return (
-          <li key={i} class='autocomplete__item' onClick={() => handleSelect()}>
-            <span key={i} data-id={item.id} innerHTML={{__html: item.value }}></span>
+          <li key={i} class='autocomplete__item' onClick={(e) => handleSelect(e)}>
+            <span key={i} data-id={item.id}>{item.value}</span>
           </li>
         )
       }
@@ -206,8 +186,8 @@ function render({ props, state, setState }) {
     if(!selectedItems.length && !multiple ) {
       return (
         <li class='autocomplete__item autocomplete__item--selected autocomplete__item__dropdown'
-            onClick={() => handleItemClick()}>
-          <span innerHTML={{__html: placeholder }}></span>
+            onClick={(e) => handleItemClick(e)}>
+          <span innerHTML={ placeholder }></span>
           <span class='autocomplete__dropdown' />
         </li>
       )
@@ -217,7 +197,7 @@ function render({ props, state, setState }) {
       let itemClass = 'autocomplete__item autocomplete__item--selected autocomplete__item__dropdown'
       let dropDown = <span class='autocomplete__dropdown' />
       let icon = <span data-id={item.id} class='autocomplete__close'
-                    onClick={() => handleRemove()}></span>
+                    onClick={(e) => handleRemove(e)}></span>
 
       if(multiple) {
         dropDown = null
@@ -225,8 +205,8 @@ function render({ props, state, setState }) {
       }
 
       return (
-        <li key={i} class={itemClass} onClick={() => handleItemClick()}>
-          <span data-id={item.id} innerHTML={{__html: item.value }}></span>
+        <li key={i} class={itemClass} onClick={(e) => handleItemClick(e)}>
+          <span data-id={item.id} innerHTML={ item.value }></span>
           { icon }
           { dropDown }
         </li>
@@ -246,9 +226,9 @@ function render({ props, state, setState }) {
              class={inputClass}
              id='searchInput'
              placeholder={placeholder}
-             onClick={() => handleClick()}
-             onFocus={() => handleFocus()}
-             onKeyUp={() => handleKeyChange()} />
+             onClick={(e) => handleClick(e)}
+             onFocus={(e) => handleFocus(e)}
+             onKeyUp={(e) => handleKeyChange(e)} />
     )
   }
 

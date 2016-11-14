@@ -15,83 +15,33 @@ deku-search is a simple Autocomplete Search component
 Pass in your `items` as a prop to deku-search. The items must be an array of objects with `value` and `id`, and any other props you may need, which will not be displayed. Check out the [example](https://github.com/StevenIseki/deku-search/blob/master/example) for more info.
 
 ```jsx
+/** @jsx element */
 import Search from 'deku-search'
-import { element } from 'deku'
+import { element, createApp } from 'deku'
 
-class TestComponent extends Component {
-
-  HiItems(items) {
-    console.log(items)
-  }
-
-  render () {
-    let items = [
-      { id: 0, value: 'ruby' },
-      { id: 1, value: 'javascript' },
-      { id: 2, value: 'lua' },
-      { id: 3, value: 'go' },
-      { id: 4, value: 'julia' }
-    ]
-
-    return (
-      <div>
-        <Search items={items} />
-
-        <Search items={items}
-                placeholder='Pick your language'
-                maxSelected={3}
-                multiple={true}
-                onItemsChanged={this.HiItems.bind(this)} />
-      </div>
-    )
-  }
+function HiItems(items) {
+  console.log(items)
 }
 
-dekuDOM.render( <TestComponent />, document.getElementById('root'))
-```
+let items = [
+  { id: 0, value: 'ruby' },
+  { id: 1, value: 'javascript' },
+  { id: 2, value: 'lua' },
+  { id: 3, value: 'go' },
+  { id: 4, value: 'julia' }
+]
 
-## Usage async
-
-To load items async before running the search to filter results you can pass a function to the `getItemsAsync` prop which will be triggered to load the results each key change. An example below using the github api to search for repos. Check out the [example](https://github.com/StevenIseki/deku-search/blob/master/example) for more info.
-
-```jsx
-import Search from 'deku-search'
-import dekuDOM from 'deku-dom'
-import deku, { Component, PropTypes } from 'deku'
-
-class TestComponent extends Component {
-
-  constructor (props) {
-    super(props)
-    this.state = { repos: [] }
-  }
-
-  getItemsAsync(searchValue, cb) {
-    let url = `https://api.github.com/search/repositories?q=${searchValue}&language=javascript`
-    fetch(url).then( (response) => {
-      return response.json();
-    }).then((results) => {
-      if(results.items != undefined){
-        let items = results.items.map( (res, i) => { return { id: i, value: res.full_name } })
-        this.setState({ repos: items })
-        cb(searchValue)
-      }
-    });
-  }
-
-  render () {
-    return (
-      <div>
-        <Search items={this.state.repos}
-                multiple={true}
-                getItemsAsync={this.getItemsAsync.bind(this)}
-                onItemsChanged={this.HiItems.bind(this)} />
-      </div>
-    )
-  }
+function update () {
+  render(<Search items={items}
+                 placeholder='Pick your language'
+                 NotFoundPlaceholder='No items found...'
+                 maxSelected={3}
+                 multiple={true}
+                 onItemsChanged={ (items) => HiItems(items) } />, {})
 }
 
-dekuDOM.render( <TestComponent />, document.getElementById('root'))
+var render = createApp(document.body, update)
+update()
 
 ```
 
@@ -117,9 +67,6 @@ Handler returns the items from the Search autocomplete component when items are 
 
 #### `onKeyChange` (optional)
 Handler returns the search value on key change.
-
-#### `getItemsAsync` (optional)
-A function to load items async before running the autocomplete filter.
 
 
 ## Styles

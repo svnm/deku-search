@@ -20,7 +20,7 @@ function update () {
                  NotFoundPlaceholder='No items found...'
                  maxSelected={3}
                  multiple={true}
-                 onItemsChanged={ () => HiItems() } />, {})
+                 onItemsChanged={ (items) => HiItems(items) } />, {})
 }
 
 var render = createApp(document.body, update)
